@@ -1,6 +1,6 @@
 # Claude Monitor
 
-> GNOME Shell extension that shows Claude and Codex AI usage limits directly in your top panel — no browser tab needed.
+> Track your Claude and Codex AI usage limits directly in the GNOME system tray — real-time, at a glance, no browser needed.
 
 ![GNOME Shell 45–49](https://img.shields.io/badge/GNOME_Shell-45--49-4A90D9?style=flat-square)
 ![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)
@@ -12,20 +12,27 @@
 
 ---
 
-## What makes this different
+## Overview
 
-Most usage trackers show a single number. Claude Monitor shows **each limit independently** — session and weekly, per provider — with individual progress bars, reset countdowns, and colors that reflect each window's own health. You can also flip the entire display between **% used** and **% left** with one click.
+Claude Monitor is a GNOME Shell extension that polls the Claude (Anthropic) and Codex (OpenAI) OAuth APIs every 3 minutes and displays live usage percentages in the system tray. Click the tray indicator to open a detailed popup with per-provider progress bars, reset timers, and status colors.
 
-Key features not found in typical extensions:
+Session and weekly limits are tracked independently for each provider. The tray label updates automatically and can be configured to show exactly what matters to you.
 
-- **5-level color scale** — green / emerald / yellow / orange / red, each tied to a specific threshold
-- **Per-entry tray coloring** — every metric in the panel bar has its own color, not a single blended one
-- **Service icons in tray** — Claude and Codex SVG icons appear inline next to each label
-- **9 configurable display modes** — from a single overall minimum to per-window fine-grained labels, shown side by side
-- **Group toggles** — selecting "Claude" in Configure toggles both session + weekly at once
-- **% used ↔ % left toggle** — GSettings-persisted, survives GNOME restarts
-- **Desktop notifications** when any window crosses below 20%, deduplicated per reset window
-- **Manual refresh** button in the popup
+---
+
+## Features
+
+- **System tray indicator** — live usage percentage always visible in the GNOME top bar
+- **Per-provider, per-window tracking** — session and weekly limits shown separately for Claude and Codex
+- **5-level color scale** — green / emerald / yellow / orange / red, each tied to a specific usage threshold
+- **Per-entry tray coloring** — each metric in the tray bar carries its own color
+- **Service icons in tray** — Claude and Codex SVG icons shown inline next to each label
+- **9 configurable display modes** — overall minimum, per-provider, per-window, or all side by side
+- **Group toggles** — selecting Claude or Codex in Configure toggles both windows at once
+- **% used ↔ % left toggle** — flip the entire display; preference is GSettings-persisted across restarts
+- **Desktop notifications** — fires when any window drops below 20%, deduplicated per reset window
+- **Manual refresh** — trigger an immediate poll from the popup menu
+- **Exponential backoff** — backs off gracefully on network errors or API rate limits
 
 ---
 
@@ -84,7 +91,7 @@ bash scripts/dev/enable.sh
 
 ## Panel display modes
 
-Open the popup → **Configure** to choose what the top-bar label shows:
+Open the popup → **Configure** to choose what the tray label shows:
 
 | Mode | What it displays |
 |------|-----------------|

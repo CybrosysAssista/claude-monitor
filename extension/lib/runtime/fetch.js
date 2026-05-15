@@ -1,6 +1,4 @@
-imports.gi.versions.Soup = '2.4';
-const { GLib } = imports.gi;
-const { Soup } = imports.gi;
+const { GLib, Soup } = imports.gi;
 
 function normalizeHeaders(headers) {
     if (!headers || typeof headers !== 'object')
@@ -27,13 +25,10 @@ function resolveBody(options) {
 }
 
 function getContentType(headers) {
-    const normalized = normalizeHeaders(headers);
-
-    for (const [name, value] of normalized) {
+    for (const [name, value] of normalizeHeaders(headers)) {
         if (name.toLowerCase() === 'content-type')
             return value;
     }
-
     return 'application/octet-stream';
 }
 
@@ -51,41 +46,7 @@ function createResponse(status, textData) {
 }
 
 var createFetch = function() {
-    const session = new Soup.SessionAsync();
-    
-    // Automatically handle gzip decoding
-    try {
-        session.add_feature_by_type(Soup.ContentDecoder.$gtype);
-    } catch(e) {}
-
-    function sendMessage(message) {
-        return new Promise((resolve, reject) => {
-            session.queue_message(message, (sess, msg) => {
-                if (msg.status_code <= 6) {
-                    reject(new Error(`Network error (Soup internal status): ${msg.status_code}`));
-                    return;
-                }
-                
-                let data = "";
-                if (msg.response_body && msg.response_body.data) {
-                    // Ensure data is treated as a string for JSON.parse
-                    data = msg.response_body.data;
-                    if (data instanceof Uint8Array || (typeof data !== 'string' && data !== null)) {
-                        try {
-                            data = new TextDecoder().decode(data);
-                        } catch (e) {
-                            data = String(data);
-                        }
-                    }
-                }
-                
-                resolve({
-                    status: msg.status_code,
-                    data: data
-                });
-            });
-        });
-    }
+    const session = new Soup.Session();
 
     async function fetch(url, options = {}) {
         const method = options.method ?? 'GET';
@@ -99,17 +60,38 @@ var createFetch = function() {
 
         const body = resolveBody(options);
         if (body !== null) {
-            // Soup 2.4 way to set body
-            message.set_request(getContentType(options.headers), Soup.MemoryUse.COPY, body);
+            const encoded = typeof body === 'string'
+                ? new TextEncoder().encode(body)
+                : body;
+            message.set_request_body_from_bytes(
+                getContentType(options.headers),
+                GLib.Bytes.new(encoded),
+            );
         }
 
-        const result = await sendMessage(message);
-        return createResponse(result.status, result.data);
+        const bytes = await new Promise((resolve, reject) => {
+            session.send_and_read_async(
+                message,
+                GLib.PRIORITY_DEFAULT,
+                null,
+                (_session, result) => {
+                    try {
+                        resolve(session.send_and_read_finish(result));
+                    } catch (e) {
+                        reject(e);
+                    }
+                },
+            );
+        });
+
+        const status = message.status_code;
+        const text = new TextDecoder().decode(bytes.get_data() ?? new Uint8Array());
+        return createResponse(status, text);
     }
 
     function dispose() {
         session.abort();
     }
 
-    return {fetch, dispose};
-}
+    return { fetch, dispose };
+};
