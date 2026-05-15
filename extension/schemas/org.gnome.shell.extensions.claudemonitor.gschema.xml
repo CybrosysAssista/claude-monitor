@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.claudemonitor"
+          path="/org/gnome/shell/extensions/claudemonitor/">
+    <key name="display-inverted" type="b">
+      <default>false</default>
+      <summary>Show percentage as remaining (% left) instead of used</summary>
+      <description>
+        false (default): display X% used — 0% used when fresh, 100% used when exhausted.
+        true: display X% left — 100% left when fresh, 0% left when exhausted.
+      </description>
+    </key>
+    <key name="panel-label-modes" type="as">
+      <default>['overall']</default>
+      <summary>Which metrics to show in the panel (multi-select)</summary>
+      <description>
+        Options: overall, all, claude, codex.
+        claude and codex can be combined. overall and all are exclusive.
+        Fine-grained: claude-session, claude-weekly, codex-session, codex-weekly.
+      </description>
+    </key>
+  </schema>
+</schemalist>
