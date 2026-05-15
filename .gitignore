@@ -1,0 +1,15 @@
+node_modules/
+*.shell-extension.zip
+.sisyphus/
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+auth.json
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/

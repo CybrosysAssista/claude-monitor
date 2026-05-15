@@ -1,0 +1,15 @@
+{
+  "uuid": "claudemonitor@assista",
+  "name": "Claude Monitor",
+  "description": "Track Claude and Codex AI usage limits in the GNOME top panel.",
+  "version": 1,
+  "shell-version": [
+    "42",
+    "45",
+    "46",
+    "47",
+    "48",
+    "49"
+  ],
+  "settings-schema": "org.gnome.shell.extensions.claudemonitor"
+}
