@@ -1,0 +1,124 @@
+/* =============================================
+   Claude Monitor — system font, full width, no extra padding
+   ============================================= */
+
+/* ── Panel Label (tray) ─────────────────────── */
+.usage-panel-gray    { color: #64748b; }
+.usage-panel-green   { color: #10b981; font-weight: bold; }
+.usage-panel-emerald { color: #34d399; font-weight: bold; }
+.usage-panel-yellow  { color: #fbbf24; font-weight: bold; }
+.usage-panel-orange  { color: #f97316; font-weight: bold; }
+.usage-panel-red     { color: #ef4444; font-weight: bold; }
+
+/* ── Tray box — the horizontal bar in the panel ── */
+.usage-tray-box {
+    spacing: 2px;
+}
+
+/* ── Popup Root ─────────────────────────────── */
+/* No background, no horizontal padding — take full menu width */
+.usage-panel {
+    background-color: transparent;
+    /* Vertical padding only; horizontal is handled by the shell menu border */
+    padding: 10px 0 6px 0;
+    spacing: 0;
+    /* Enforce a minimum width so the popup isn't too narrow */
+    min-width: 340px;
+}
+
+/* ── Service Card ───────────────────────────── */
+.usage-card {
+    background-color: transparent;
+    padding: 0;
+    spacing: 0;
+}
+
+/* ── Card Logo Header ───────────────────────── */
+.usage-card-head {
+    spacing: 0;
+    padding: 0 0 8px 0;
+    min-height: 32px;
+}
+
+/* ── Metric Block ───────────────────────────── */
+.usage-metric {
+    spacing: 0;
+    padding: 0;
+}
+
+/* ── Metric Row ─────────────────────────────── */
+.usage-m-row {
+    spacing: 0;
+    padding-bottom: 4px;
+}
+
+/* ── Metric Label — uses system font ────────── */
+.usage-m-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Metric Percentage ──────────────────────── */
+.usage-m-pct {
+    font-size: 11px;
+    font-weight: 700;
+    /* color set dynamically from JS */
+}
+
+/* ── Progress Track — full width, thin ──────── */
+.usage-track {
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.10);
+    border-radius: 3px;
+    /* No margin — fills the full available width */
+}
+
+/* ── Progress Fill Colors ────────────────────── */
+.usage-fill-gray    { height: 5px; border-radius: 3px; background-color: #64748b; }
+.usage-fill-green   { height: 5px; border-radius: 3px; background-color: #10b981; }
+.usage-fill-emerald { height: 5px; border-radius: 3px; background-color: #34d399; }
+.usage-fill-yellow  { height: 5px; border-radius: 3px; background-color: #fbbf24; }
+.usage-fill-orange  { height: 5px; border-radius: 3px; background-color: #f97316; }
+.usage-fill-red     { height: 5px; border-radius: 3px; background-color: #ef4444; }
+
+/* ── Reset sub-text ─────────────────────────── */
+.usage-m-reset {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.28);
+    padding-top: 3px;
+    padding-bottom: 10px;
+}
+
+/* ── Divider between Session and Weekly ──────── */
+.usage-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.07);
+    margin-bottom: 8px;
+}
+
+/* ── Separator between Codex and Claude cards ── */
+.usage-card-separator {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.12);
+    margin-top: 2px;
+    margin-bottom: 10px;
+}
+
+/* ── Footer ─────────────────────────────────── */
+.usage-footer {
+    spacing: 0;
+    padding-top: 6px;
+    padding-bottom: 2px;
+}
+
+.usage-footer-left {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.22);
+    font-style: italic;
+}
+
+.usage-next {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.22);
+}
