@@ -1,0 +1,17 @@
+# SwiftPM build artifacts
+.build/
+Packages/
+Package.resolved
+.swiftpm/
+
+# Assembled app bundle (rebuilt via build.sh)
+Claude Monitor.app/
+
+# Xcode (if anyone opens this as a project)
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+
+# macOS Finder
+.DS_Store
