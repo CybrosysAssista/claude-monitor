@@ -1,4 +1,4 @@
-const VERSION = 'Claude Monitor 1.0.0';
+const VERSION = 'Claude Monitor 1.1.0';
 
 // All user-facing mode keys (high-level + fine-grained)
 var PANEL_LABEL_MODES = [
