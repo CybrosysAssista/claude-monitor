@@ -186,7 +186,14 @@ var createClaudeProvider = function(options = {}) {
                 return fail('parse_error', 'Unable to parse Claude credentials JSON');
             }
 
-            const oauthCredentials = parsedCredentials?.claudeAiOauth;
+            const topLevel = parsedCredentials;
+            const hasTopLevelOAuth = Boolean(
+                topLevel?.accessToken || topLevel?.access_token ||
+                topLevel?.refreshToken || topLevel?.refresh_token,
+            );
+            const oauthCredentials = parsedCredentials?.claudeAiOauth
+                ?? (hasTopLevelOAuth ? topLevel : null);
+
             if (!oauthCredentials)
                 return fail('missing_creds', 'Missing claudeAiOauth in credentials JSON');
 
@@ -236,3 +243,7 @@ var claudeProviderConfig = {
     OAUTH_BETA_HEADER,
     CLAUDE_CLIENT_ID,
 };
+
+if (typeof module !== 'undefined') {
+    module.exports = {createClaudeProvider, claudeProviderConfig};
+}

@@ -76,3 +76,7 @@ var snapshotProviderState = function(state) {
         lastUpdatedAtIso: state.lastUpdatedAtIso,
     };
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {PROVIDER_STATE_CODES, createProviderState, applyProviderResult, snapshotProviderState};
+}

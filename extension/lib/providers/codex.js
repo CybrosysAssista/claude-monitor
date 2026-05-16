@@ -205,3 +205,7 @@ var codexProviderConfig = {
     USAGE_ENDPOINT,
     CODEX_CLIENT_ID,
 };
+
+if (typeof module !== 'undefined') {
+    module.exports = {createCodexProvider, codexProviderConfig};
+}

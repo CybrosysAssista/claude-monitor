@@ -2,7 +2,6 @@
   "name": "claude-monitor",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "test": "bun test",
     "smoke:pack": "bash scripts/smoke/pack.sh"

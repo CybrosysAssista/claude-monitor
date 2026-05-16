@@ -74,3 +74,7 @@ var createBackoffManager = function(options = {}) {
         },
     };
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {createBackoffManager, DEFAULT_BACKOFF_INITIAL_DELAY_MS, DEFAULT_BACKOFF_MAX_DELAY_MS};
+}

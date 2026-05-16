@@ -122,3 +122,7 @@ var createScheduler = function(options = {}) {
         getSummary,
     };
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {createScheduler, DEFAULT_POLL_INTERVAL_MS};
+}

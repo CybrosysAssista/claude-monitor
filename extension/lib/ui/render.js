@@ -58,11 +58,11 @@ const MODE_LABEL = {
 
 // Which service icon for each specific mode
 const MODE_ICON = {
-    'min':            null,      // both icons shown
+    'min':            null,          // both icons shown
     'claude-session': 'claude',
     'claude-weekly':  'claude',
-    'codex-session':  'codex',
-    'codex-weekly':   'codex',
+    'codex-session':  'codex-symbolic',
+    'codex-weekly':   'codex-symbolic',
 };
 
 function buildPanelColor(summary, specificModes) {
@@ -90,21 +90,11 @@ function formatPercent(value, inverted = false) {
 }
 
 var getDotColor = function(pct) {
-    if (!Number.isFinite(pct))
-        return 'gray';
-
-    if (pct >= 80)
-        return 'green';
-
-    if (pct >= 50)
-        return 'emerald';
-
-    if (pct >= 30)
-        return 'yellow';
-
-    if (pct >= 15)
-        return 'orange';
-
+    if (!Number.isFinite(pct)) return 'red';
+    if (pct >= 80) return 'green';
+    if (pct >= 50) return 'emerald';
+    if (pct >= 30) return 'yellow';
+    if (pct >= 15) return 'orange';
     return 'red';
 }
 
@@ -162,6 +152,9 @@ function toWarningText(providerLabel, code) {
     if (code === 'PARTIAL_DATA')
         return `${providerLabel}: partial usage data`;
 
+    if (code === 'RATE_LIMITED')
+        return `${providerLabel}: rate limited`;
+
     if (code === 'NETWORK_ERROR')
         return `${providerLabel}: network error`;
 
@@ -169,7 +162,7 @@ function toWarningText(providerLabel, code) {
         return `${providerLabel}: schema changed`;
 
     if (code === 'MISSING_CREDS')
-        return `${providerLabel}: missing credentials`;
+        return `${providerLabel}: sign in with CLI to enable`;
 
     return '';
 }
@@ -179,7 +172,7 @@ function buildWindowViewModel(label, remainingPct, resetsAtIso, now, inverted = 
     return {
         label,
         remainingPct: safeRemaining,
-        fillPct: inverted ? safeRemaining : Math.round(100 - safeRemaining),
+        fillPct: inverted ? safeRemaining : (100 - safeRemaining),
         remainingText: formatRemainingText(remainingPct, inverted),
         resetsInText: formatResetsIn(resetsAtIso, now),
         dotColor: getDotColor(remainingPct),
@@ -191,6 +184,7 @@ function buildServiceViewModel(name, providerData, providerCode, now, inverted =
 
     return {
         name,
+        code: providerCode ?? null,
         windows: [
             buildWindowViewModel(
                 'Session',
@@ -225,15 +219,24 @@ function formatNextUpdate(lastUpdatedAtIso, pollIntervalMs, now) {
     if (diffMs <= 0)
         return 'Next update in 0m';
 
-    const totalMinutes = Math.max(1, Math.ceil(diffMs / 60_000));
-    return `Next update in ${totalMinutes}m`;
+    const totalSecs = Math.max(1, Math.ceil(diffMs / 1000));
+    const m = Math.floor(totalSecs / 60);
+    const s = totalSecs % 60;
+
+    if (m > 0 && s > 0)
+        return `Next update in ${m}m ${s}s`;
+
+    if (m > 0)
+        return `Next update in ${m}m`;
+
+    return `Next update in ${s}s`;
 }
 
 var buildUsageViewModel = function(summary, deps = {}) {
     const now = deps.now ?? Date.now();
     const version = deps.version ?? VERSION;
     const pollIntervalMs = deps.pollIntervalMs ?? 180_000;
-    const inverted = deps.displayInverted ?? false;
+    const inverted = deps.displayInverted ?? true;
 
     // Accept both old single string and new array; default to 'overall'
     let userModes = deps.panelLabelModes ?? deps.panelLabelMode ?? ['overall'];
@@ -261,8 +264,13 @@ var buildUsageViewModel = function(summary, deps = {}) {
         };
     });
 
+    const panelLabelVal = specificModes.length > 0
+        ? getPanelLabelValue(summary, specificModes[0])
+        : undefined;
+
     return {
         panelColor: buildPanelColor(summary, specificModes),
+        panelLabel: formatPercent(panelLabelVal, inverted),
         panelEntries,
         services: [
             buildServiceViewModel('Codex', codex?.data, codex?.code, now, inverted),
@@ -271,4 +279,8 @@ var buildUsageViewModel = function(summary, deps = {}) {
         version,
         lastUpdate: formatNextUpdate(summary?.lastUpdatedAtIso, pollIntervalMs, now),
     };
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = {buildUsageViewModel, formatRelativeTime, getDotColor, PANEL_LABEL_MODES};
 }

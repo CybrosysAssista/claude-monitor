@@ -51,3 +51,7 @@ var normalizeCodexUsage = function(payload) {
         hasPartialData: !primaryWindow || !secondaryWindow,
     };
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {normalizeClaudeUsage, normalizeCodexUsage};
+}

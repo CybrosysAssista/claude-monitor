@@ -1,8 +1,9 @@
 # Claude Monitor
 
-> Track your Claude and Codex AI usage limits directly in the GNOME system tray — real-time, at a glance, no browser needed.
+> Track your Claude and Codex AI usage limits in real time — GNOME system tray on Linux, native menu bar app on macOS.
 
 ![GNOME Shell 45–49](https://img.shields.io/badge/GNOME_Shell-45--49-4A90D9?style=flat-square)
+![macOS 13+](https://img.shields.io/badge/macOS-13%2B-000000?style=flat-square&logo=apple)
 ![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)
 ![Author: CybrosysAssista](https://img.shields.io/badge/Author-CybrosysAssista-8b5cf6?style=flat-square)
 
@@ -12,27 +13,91 @@
 
 ---
 
+## Install
+
+### macOS
+
+**Requirements:** macOS 13 (Ventura) or newer.
+
+1. Download **`Claude.Monitor.dmg`** from [Releases](https://github.com/CybrosysAssista/claude-monitor/releases/latest)
+2. Open the `.dmg` — drag **Claude Monitor.app** into `/Applications`
+3. Launch from `/Applications`
+
+> **First launch only — Gatekeeper bypass (app is not notarized):**
+> - Right-click the app in Finder → **Open** → click **Open** in the dialog
+> - Or: **System Settings → Privacy & Security → scroll down → Open Anyway**
+>
+> macOS remembers your choice for all future launches.
+
+4. The menu bar entry appears immediately. Click it to see session and weekly breakdowns.
+
+**Credentials:** Reads automatically from the files the CLI tools write — no extra setup needed if you already use Claude Code or Codex CLI:
+
+| Provider | File |
+|----------|------|
+| Claude | `~/.claude/.credentials.json` |
+| Codex | `~/.codex/auth.json` |
+
+If a file is missing, that provider shows **→ Install CLI** in the menu with a link to the install page.
+
+---
+
+### Linux (GNOME Shell)
+
+**Requirements:** GNOME Shell 45–49 (Ubuntu 22.04, 24.04, Fedora 39+).
+
+**From GitHub Releases:**
+
+```bash
+# Download claudemonitor@assista.shell-extension.zip from Releases, then:
+gnome-extensions install --force claudemonitor@assista.shell-extension.zip
+
+# Restart GNOME Shell:
+# Wayland — log out and log back in
+# X11     — Alt+F2 → type r → Enter
+
+gnome-extensions enable claudemonitor@assista
+```
+
+**From source:**
+
+```bash
+git clone https://github.com/CybrosysAssista/claude-monitor.git
+cd claude-monitor
+bash scripts/dev/pack.sh
+bash scripts/dev/install.sh
+bash scripts/dev/enable.sh
+```
+
+**Credentials:** Same files as macOS — written automatically by the CLI tools:
+
+| Provider | File |
+|----------|------|
+| Claude | `~/.claude/.credentials.json` |
+| Codex | `~/.codex/auth.json` |
+
+Sign in once via `claude` or `codex` CLI — the monitor picks up the session automatically.
+
+---
+
 ## Overview
 
-Claude Monitor is a GNOME Shell extension that polls the Claude (Anthropic) and Codex (OpenAI) OAuth APIs every 3 minutes and displays live usage percentages in the system tray. Click the tray indicator to open a detailed popup with per-provider progress bars, reset timers, and status colors.
-
-Session and weekly limits are tracked independently for each provider. The tray label updates automatically and can be configured to show exactly what matters to you.
+Claude Monitor polls the Claude (Anthropic) and Codex (OpenAI) OAuth APIs every 3 minutes and displays live usage percentages without opening a browser. Session and weekly limits are tracked independently for each provider.
 
 ---
 
 ## Features
 
-- **System tray indicator** — live usage percentage always visible in the GNOME top bar
+- **Live tray / menu bar indicator** — usage percentage always visible at a glance
 - **Per-provider, per-window tracking** — session and weekly limits shown separately for Claude and Codex
-- **5-level color scale** — green / emerald / yellow / orange / red, each tied to a specific usage threshold
-- **Per-entry tray coloring** — each metric in the tray bar carries its own color
-- **Service icons in tray** — Claude and Codex SVG icons shown inline next to each label
+- **5-level color scale** — green / emerald / yellow / orange / red, each tied to a specific threshold
 - **9 configurable display modes** — overall minimum, per-provider, per-window, or all side by side
-- **Group toggles** — selecting Claude or Codex in Configure toggles both windows at once
-- **% used ↔ % left toggle** — flip the entire display; preference is GSettings-persisted across restarts
+- **% used ↔ % left toggle** — flip the entire display; preference persists across restarts
 - **Desktop notifications** — fires when any window drops below 20%, deduplicated per reset window
-- **Manual refresh** — trigger an immediate poll from the popup menu
-- **Exponential backoff** — backs off gracefully on network errors or API rate limits
+- **Manual refresh** — trigger an immediate poll from the popup / menu
+- **Exponential backoff** — backs off gracefully on network errors or API rate limits (30 s → 15 min cap)
+- **About menu** — version info, GitHub and Cybrosys Assista links
+- **Install CLI links** — clickable links shown when credentials are missing
 
 ---
 
@@ -48,48 +113,7 @@ Session and weekly limits are tracked independently for each provider. The tray 
 
 ---
 
-## Requirements
-
-- GNOME Shell 45–49
-- Credentials on disk from the respective CLI tools:
-
-| Provider | Credential file |
-|----------|----------------|
-| Claude | `~/.claude/.credentials.json` |
-| Codex | `~/.codex/auth.json` |
-
-Credentials are written automatically when you sign in via [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [Codex CLI](https://github.com/openai/codex).
-
----
-
-## Installation
-
-**From GitHub Releases**
-
-```bash
-# Download claudemonitor@assista.shell-extension.zip from Releases, then:
-gnome-extensions install --force claudemonitor@assista.shell-extension.zip
-
-# Restart GNOME Shell
-# Wayland: log out → log back in
-# X11: Alt+F2 → r → Enter
-
-gnome-extensions enable claudemonitor@assista
-```
-
-**From source**
-
-```bash
-git clone git@github.com:CybrosysAssista/claude-monitor.git
-cd claude-monitor
-bash scripts/dev/pack.sh
-bash scripts/dev/install.sh
-bash scripts/dev/enable.sh
-```
-
----
-
-## Panel display modes
+## Panel / menu bar display modes
 
 Open the popup → **Configure** to choose what the tray label shows:
 
@@ -105,11 +129,11 @@ Open the popup → **Configure** to choose what the tray label shows:
 | Codex · Weekly | Codex weekly only |
 | None | Hides the tray label (popup still works) |
 
-Toggle **Reversed (% left)** to flip between "% used" (default) and "% left".
+Toggle **Reversed (% left)** to flip between "% used" and "% left".
 
 ---
 
-## Architecture
+## Architecture (GNOME extension)
 
 ```
 extension.js                 — GNOME lifecycle, GObject UI, wires DI
@@ -130,13 +154,13 @@ extension/lib/
   ui/
     render.js                — pure function: summary → view-model strings
 extension/schemas/           — GSettings schema (display-inverted, panel-label-modes)
-extension/icons/             — claude.svg, codex.svg
+extension/icons/             — claude.svg, codex-symbolic.svg
 test/unit/                   — bun:test unit tests, all I/O mocked via DI
 ```
 
 ---
 
-## Development
+## Development (GNOME extension)
 
 ```bash
 npx bun test                              # run unit tests

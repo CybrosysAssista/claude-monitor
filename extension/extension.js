@@ -16,19 +16,17 @@ const {readTextFile} = Me.imports.lib.runtime.fs;
 const {createFetch} = Me.imports.lib.runtime.fetch;
 const {buildUsageViewModel, PANEL_LABEL_MODES} = Me.imports.lib.ui.render;
 
-// Map dot colors to hex-style CSS colors for inline style on percent label
+// Inline color on the percent label (5-color scheme matching macOS)
 const FILL_COLOR = {
-    gray:    '#64748b',
-    green:   '#10b981',
+    green:   '#22c55e',
     emerald: '#34d399',
-    yellow:  '#fbbf24',
+    yellow:  '#f59e0b',
     orange:  '#f97316',
     red:     '#ef4444',
 };
 
 // CSS class for the bar fill
 const FILL_CLASSES = {
-    gray:    'usage-fill-gray',
     green:   'usage-fill-green',
     emerald: 'usage-fill-emerald',
     yellow:  'usage-fill-yellow',
@@ -45,14 +43,22 @@ const PANEL_CLASSES = {
     red:     'usage-panel-red',
 };
 
+// Install URLs shown when CLI credentials are missing
+const INSTALL_URLS = {
+    Claude: 'https://docs.anthropic.com/en/docs/claude-code',
+    Codex:  'https://github.com/openai/codex',
+};
+
 // Build one metric block: label + pct row, track, reset text
 function createMetricWidgets() {
     const box = new St.BoxLayout({vertical: true, style_class: 'usage-metric'});
     box.set_x_expand(true);
+    box.layout_manager.spacing = 0;
 
     // Row: label left, pct right
     const mRow = new St.BoxLayout({style_class: 'usage-m-row'});
     mRow.set_x_expand(true);
+    mRow.layout_manager.spacing = 0;
     const mLabel = new St.Label({text: '--', style_class: 'usage-m-label'});
     mLabel.set_x_expand(false);
     const mPct = new St.Label({text: '--%', style_class: 'usage-m-pct'});
@@ -81,6 +87,7 @@ function createMetricWidgets() {
 
     // Reset text (right-aligned)
     const mReset = new St.Label({text: '--', style_class: 'usage-m-reset'});
+    mReset.style = 'font-size: 11px; padding-top: 8px; padding-bottom: 12px;';
     mReset.set_x_expand(true);
     mReset.set_x_align(Clutter.ActorAlign.END);
 
@@ -92,9 +99,10 @@ function createMetricWidgets() {
 }
 
 // Build one service card (logo header + 2 metrics separated by a divider)
-function createServiceCard(iconPath) {
+function createServiceCard(iconPath, title) {
     const card = new St.BoxLayout({vertical: true, style_class: 'usage-card'});
     card.set_x_expand(true);
+    card.layout_manager.spacing = 0;
 
     // Logo header
     const cardHead = new St.BoxLayout({style_class: 'usage-card-head'});
@@ -112,7 +120,22 @@ function createServiceCard(iconPath) {
         const fallback = new St.Label({text: '●', style_class: 'usage-m-label'});
         cardHead.add_child(fallback);
     }
+
+    const titleLabel = new St.Label({text: title, style_class: 'usage-card-title'});
+    titleLabel.set_y_align(Clutter.ActorAlign.CENTER);
+    cardHead.add_child(titleLabel);
     card.add_child(cardHead);
+
+    const warningLabel = new St.Label({text: '', style_class: 'usage-card-warning'});
+    warningLabel.set_x_expand(true);
+    warningLabel.hide();
+    card.add_child(warningLabel);
+
+    // Clickable install link — shown only when MISSING_CREDS
+    const installLabel = new St.Label({text: '', style_class: 'usage-install-link', reactive: true});
+    installLabel.set_x_expand(true);
+    installLabel.hide();
+    card.add_child(installLabel);
 
     const metric0 = createMetricWidgets();
     const divider = new St.Widget({style_class: 'usage-divider'});
@@ -123,7 +146,7 @@ function createServiceCard(iconPath) {
     card.add_child(divider);
     card.add_child(metric1.box);
 
-    return {card, metrics: [metric0, metric1]};
+    return {card, metrics: [metric0, metric1], warningLabel, installLabel};
 }
 
 const MODE_LABELS = {
@@ -145,11 +168,11 @@ const CODEX_KEYS  = ['codex-session', 'codex-weekly'];
 
 // Which service icon to show in the tray for each mode
 const MODE_SERVICE_MAP = {
-    'min':            null,      // show both icons
+    'min':            null,
     'claude-session': 'claude',
     'claude-weekly':  'claude',
-    'codex-session':  'codex',
-    'codex-weekly':   'codex',
+    'codex-session':  'codex-symbolic',
+    'codex-weekly':   'codex-symbolic',
 };
 
 const UsageIndicator = GObject.registerClass(
@@ -172,7 +195,12 @@ class UsageIndicator extends PanelMenu.Button {
         this.add_child(this._trayBox);
 
         this._buildPopup();
-        this._startRelativeTimeTimer();
+        this.menu.connect('open-state-changed', (_menu, isOpen) => {
+            if (isOpen)
+                this._startLiveTimer();
+            else
+                this._stopLiveTimer();
+        });
 
         this._settingsChangedId = this._settings.connect('changed::panel-label-modes', () => {
             this._updateOrnaments();
@@ -192,6 +220,7 @@ class UsageIndicator extends PanelMenu.Button {
         const menuItem = new PopupMenu.PopupBaseMenuItem({
             reactive: false,
             can_focus: false,
+            style_class: 'usage-popup-item',
         });
         menuItem.set_x_expand(true);
 
@@ -204,10 +233,10 @@ class UsageIndicator extends PanelMenu.Button {
         this._popupBox.set_x_align(Clutter.ActorAlign.FILL);
 
         // Codex card (index 0 in vm.services)
-        this._codexCard = createServiceCard(this._iconPath('codex'));
+        this._codexCard = createServiceCard(this._iconPath('codex-symbolic'), 'Codex');
 
         // Claude card (index 1 in vm.services)
-        this._claudeCard = createServiceCard(this._iconPath('claude'));
+        this._claudeCard = createServiceCard(this._iconPath('claude'), 'Claude');
 
         // Separator between the two cards
         const cardSep = new St.Widget({style_class: 'usage-card-separator'});
@@ -218,7 +247,9 @@ class UsageIndicator extends PanelMenu.Button {
         footer.set_x_expand(true);
 
         this._versionLabel = new St.Label({text: 'Claude Monitor 1.0.0', style_class: 'usage-footer-left'});
+        this._versionLabel.style = 'font-size: 11px; font-style: italic;';
         this._nextUpdateLabel = new St.Label({text: 'Next update in --', style_class: 'usage-next'});
+        this._nextUpdateLabel.style = 'font-size: 11px;';
         const footerSpacer = new St.Widget();
         footerSpacer.set_x_expand(true);
 
@@ -242,7 +273,9 @@ class UsageIndicator extends PanelMenu.Button {
         // Separator + Refresh + Panel display
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        const refreshItem = new PopupMenu.PopupMenuItem('↺  Refresh Now');
+        const refreshItem = new PopupMenu.PopupMenuItem('↻  Refresh Now');
+        if (refreshItem._ornamentLabel)
+            refreshItem._ornamentLabel.set_width(0);
         this._refreshSignalId = refreshItem.connect('activate', () => {
             void this._scheduler?.refresh();
         });
@@ -250,10 +283,83 @@ class UsageIndicator extends PanelMenu.Button {
         this.menu.addMenuItem(refreshItem);
 
         this._buildDisplaySubmenu();
+        this._buildAboutSubmenu();
+
+        const quitItem = new PopupMenu.PopupMenuItem('Quit');
+        if (quitItem._ornamentLabel)
+            quitItem._ornamentLabel.set_width(0);
+        quitItem.connect('activate', () => {
+            imports.gi.GLib.spawn_async(
+                null,
+                ['gnome-extensions', 'disable', Me.metadata.uuid],
+                null,
+                imports.gi.GLib.SpawnFlags.SEARCH_PATH,
+                null,
+            );
+        });
+        this.menu.addMenuItem(quitItem);
+    }
+
+    _openUrl(url) {
+        try {
+            Gio.AppInfo.launch_default_for_uri(url, null);
+        } catch (_e) {
+            // Fallback: try xdg-open via GLib.spawn_async
+            try {
+                GLib.spawn_async(null, ['xdg-open', url], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            } catch (_e2) { /* ignore */ }
+        }
+    }
+
+    _buildAboutSubmenu() {
+        this._aboutSubmenu = new PopupMenu.PopupSubMenuMenuItem('About Claude Monitor');
+        if (this._aboutSubmenu._ornamentLabel)
+            this._aboutSubmenu._ornamentLabel.set_width(0);
+
+        const versionItem = new PopupMenu.PopupMenuItem(
+            `Version: ${Me.metadata.version ?? '1.0.0'}`,
+            {reactive: false},
+        );
+        if (versionItem._ornamentLabel)
+            versionItem._ornamentLabel.set_width(0);
+        this._aboutSubmenu.menu.addMenuItem(versionItem);
+
+        const descItem = new PopupMenu.PopupMenuItem(
+            'Track Claude & Codex usage limits',
+            {reactive: false},
+        );
+        if (descItem._ornamentLabel)
+            descItem._ornamentLabel.set_width(0);
+        this._aboutSubmenu.menu.addMenuItem(descItem);
+
+        this._aboutSubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        const githubItem = new PopupMenu.PopupMenuItem('GitHub →');
+        if (githubItem._ornamentLabel)
+            githubItem._ornamentLabel.set_width(0);
+        githubItem.connect('activate', () =>
+            this._openUrl('https://github.com/CybrosysAssista/claude-monitor'));
+        this._aboutSubmenu.menu.addMenuItem(githubItem);
+
+        const cybrosysItem = new PopupMenu.PopupMenuItem('Cybrosys Assista →');
+        if (cybrosysItem._ornamentLabel)
+            cybrosysItem._ornamentLabel.set_width(0);
+        cybrosysItem.connect('activate', () =>
+            this._openUrl('https://assista.cybrosys.com'));
+        this._aboutSubmenu.menu.addMenuItem(cybrosysItem);
+
+        const licenseItem = new PopupMenu.PopupMenuItem('MIT License', {reactive: false});
+        if (licenseItem._ornamentLabel)
+            licenseItem._ornamentLabel.set_width(0);
+        this._aboutSubmenu.menu.addMenuItem(licenseItem);
+
+        this.menu.addMenuItem(this._aboutSubmenu);
     }
 
     _buildDisplaySubmenu() {
         this._displaySubmenu = new PopupMenu.PopupSubMenuMenuItem('Configure');
+        if (this._displaySubmenu._ornamentLabel)
+            this._displaySubmenu._ornamentLabel.set_width(0);
         this._modeItems = [];
 
         for (const mode of PANEL_LABEL_MODES) {
@@ -377,15 +483,25 @@ class UsageIndicator extends PanelMenu.Button {
         }
     }
 
-    _startRelativeTimeTimer() {
+    _startLiveTimer() {
+        if (this._timerSourceId)
+            return;
+
         this._timerSourceId = GLib.timeout_add_seconds(
             GLib.PRIORITY_DEFAULT,
-            60,
+            1,
             () => {
                 this._refreshRelativeTimes();
                 return GLib.SOURCE_CONTINUE;
             },
         );
+    }
+
+    _stopLiveTimer() {
+        if (this._timerSourceId) {
+            GLib.source_remove(this._timerSourceId);
+            this._timerSourceId = 0;
+        }
     }
 
     _refreshRelativeTimes() {
@@ -470,7 +586,7 @@ class UsageIndicator extends PanelMenu.Button {
             // Service icon (claude / codex), or both for 'min'
             if (entry.mode === 'min') {
                 // Show both icons side by side for the global minimum
-                for (const svc of ['codex', 'claude']) {
+                for (const svc of ['codex-symbolic', 'claude']) {
                     const icon = this._makeTrayIcon(svc, 14);
                     this._trayBox.add_child(icon);
                     this._trayWidgets.push(icon);
@@ -516,6 +632,31 @@ class UsageIndicator extends PanelMenu.Button {
         for (let i = 0; i < vm.services.length; i++) {
             const svc = vm.services[i];
             const card = cards[i];
+
+            if (svc.warning) {
+                card.warningLabel.text = svc.warning;
+                card.warningLabel.show();
+            } else {
+                card.warningLabel.hide();
+            }
+
+            // Install link: shown only for MISSING_CREDS
+            const isMissing = svc.code === 'MISSING_CREDS';
+            if (isMissing) {
+                const url = INSTALL_URLS[svc.name] ?? null;
+                if (url && !card._installConnected) {
+                    card.installLabel.connect('button-press-event', () => {
+                        this._openUrl(url);
+                        return Clutter.EVENT_STOP;
+                    });
+                    card._installConnected = true;
+                }
+                card.installLabel.text = `→ Install ${svc.name} CLI`;
+                card.installLabel.show();
+            } else {
+                card.installLabel.hide();
+            }
+
             for (let j = 0; j < svc.windows.length; j++) {
                 this._applyMetric(card.metrics[j], svc.windows[j]);
             }
@@ -526,10 +667,7 @@ class UsageIndicator extends PanelMenu.Button {
     }
 
     destroy() {
-        if (this._timerSourceId) {
-            GLib.source_remove(this._timerSourceId);
-            this._timerSourceId = 0;
-        }
+        this._stopLiveTimer();
 
         if (this._refreshSignalId && this._refreshItem) {
             this._refreshItem.disconnect(this._refreshSignalId);

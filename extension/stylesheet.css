@@ -1,111 +1,141 @@
 /* =============================================
-   Claude Monitor — system font, full width, no extra padding
+   Claude Monitor
+   Primary text: NO explicit color — inherits from shell stage
+   (same chain as "Refresh Now" / "Configure" items)
+   Muted text: @insensitive_fg_color = rgba(247,247,247,0.5) in
+   Yaru-dark, adapts automatically on light themes
+   Status colors: explicit green/yellow/red only
    ============================================= */
 
 /* ── Panel Label (tray) ─────────────────────── */
-.usage-panel-gray    { color: #64748b; }
-.usage-panel-green   { color: #10b981; font-weight: bold; }
+.usage-panel-gray    { color: @insensitive_fg_color; }
+.usage-panel-green   { color: #22c55e; font-weight: bold; }
 .usage-panel-emerald { color: #34d399; font-weight: bold; }
-.usage-panel-yellow  { color: #fbbf24; font-weight: bold; }
+.usage-panel-yellow  { color: #f59e0b; font-weight: bold; }
 .usage-panel-orange  { color: #f97316; font-weight: bold; }
 .usage-panel-red     { color: #ef4444; font-weight: bold; }
 
-/* ── Tray box — the horizontal bar in the panel ── */
+/* ── Tray box ────────────────────────────────── */
 .usage-tray-box {
     spacing: 2px;
 }
 
-/* ── Popup Root ─────────────────────────────── */
-/* No background, no horizontal padding — take full menu width */
+/* ── Strip PopupBaseMenuItem row styling ──────── */
+.usage-popup-item {
+    background-color: transparent !important;
+    padding: 0 !important;
+    spacing: 0;
+}
+
+/* ── Popup root ───────────────────────────────── */
 .usage-panel {
     background-color: transparent;
-    /* Vertical padding only; horizontal is handled by the shell menu border */
-    padding: 10px 0 6px 0;
+    padding: 10px 4px 6px 4px;
     spacing: 0;
-    /* Enforce a minimum width so the popup isn't too narrow */
     min-width: 340px;
 }
 
-/* ── Service Card ───────────────────────────── */
+/* ── Service Card ─────────────────────────────── */
 .usage-card {
     background-color: transparent;
     padding: 0;
     spacing: 0;
 }
 
-/* ── Card Logo Header ───────────────────────── */
+/* ── Card Logo Header ─────────────────────────── */
+/* No color set — inherits stage color, flows as currentColor
+   into the symbolic SVG icon automatically                    */
 .usage-card-head {
-    spacing: 0;
+    spacing: 8px;
     padding: 0 0 8px 0;
     min-height: 32px;
 }
 
-/* ── Metric Block ───────────────────────────── */
+/* ── Card Title — inherits stage color (matches menu items) ── */
+.usage-card-title {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ── Card Warning ─────────────────────────────── */
+.usage-card-warning {
+    font-size: 11px;
+    color: #ea580c;
+    padding-bottom: 6px;
+}
+
+/* ── Install CLI link ─────────────────────────── */
+.usage-install-link {
+    font-size: 11px;
+    color: #60a5fa;
+    padding-bottom: 8px;
+}
+
+/* ── Metric Block ─────────────────────────────── */
 .usage-metric {
     spacing: 0;
     padding: 0;
 }
 
-/* ── Metric Row ─────────────────────────────── */
+/* ── Metric Row ───────────────────────────────── */
 .usage-m-row {
     spacing: 0;
     padding-bottom: 4px;
 }
 
-/* ── Metric Label — uses system font ────────── */
+/* ── Metric Label — inherits stage color ─────── */
 .usage-m-label {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.45);
 }
 
-/* ── Metric Percentage ──────────────────────── */
+/* ── Metric Percentage — colour set by JS inline style ──────── */
 .usage-m-pct {
     font-size: 11px;
     font-weight: 700;
-    /* color set dynamically from JS */
 }
 
-/* ── Progress Track — full width, thin ──────── */
+/* ── Progress Track ───────────────────────────── */
 .usage-track {
     height: 5px;
-    background-color: rgba(255, 255, 255, 0.10);
+    background-color: rgba(128, 128, 128, 0.22);
     border-radius: 3px;
-    /* No margin — fills the full available width */
 }
 
-/* ── Progress Fill Colors ────────────────────── */
-.usage-fill-gray    { height: 5px; border-radius: 3px; background-color: #64748b; }
-.usage-fill-green   { height: 5px; border-radius: 3px; background-color: #10b981; }
+/* ── Progress Fill Colors ─────────────────────── */
+.usage-fill-green   { height: 5px; border-radius: 3px; background-color: #22c55e; }
 .usage-fill-emerald { height: 5px; border-radius: 3px; background-color: #34d399; }
-.usage-fill-yellow  { height: 5px; border-radius: 3px; background-color: #fbbf24; }
+.usage-fill-yellow  { height: 5px; border-radius: 3px; background-color: #f59e0b; }
 .usage-fill-orange  { height: 5px; border-radius: 3px; background-color: #f97316; }
 .usage-fill-red     { height: 5px; border-radius: 3px; background-color: #ef4444; }
+.usage-fill-gray    { height: 5px; border-radius: 3px; background-color: rgba(128, 128, 128, 0.4); }
 
-/* ── Reset sub-text ─────────────────────────── */
+/* ── Reset sub-text — muted ──────────────────── */
 .usage-m-reset {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.28);
-    padding-top: 3px;
-    padding-bottom: 10px;
+    font-weight: normal;
+    font-style: normal;
+    color: @insensitive_fg_color;
+    opacity: 0.5;
+    padding-top: 6px;
+    padding-bottom: 12px;
 }
 
-/* ── Divider between Session and Weekly ──────── */
+/* ── Dividers ─────────────────────────────────── */
 .usage-divider {
     height: 1px;
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: rgba(128, 128, 128, 0.2);
     margin-bottom: 8px;
 }
 
-/* ── Separator between Codex and Claude cards ── */
 .usage-card-separator {
     height: 1px;
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(128, 128, 128, 0.2);
     margin-top: 2px;
     margin-bottom: 10px;
 }
 
-/* ── Footer ─────────────────────────────────── */
+/* ── Footer ───────────────────────────────────── */
 .usage-footer {
     spacing: 0;
     padding-top: 6px;
@@ -114,11 +144,16 @@
 
 .usage-footer-left {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.22);
+    font-weight: normal;
     font-style: italic;
+    color: @insensitive_fg_color;
+    opacity: 0.5;
 }
 
 .usage-next {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.22);
+    font-weight: normal;
+    font-style: normal;
+    color: @insensitive_fg_color;
+    opacity: 0.5;
 }

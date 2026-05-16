@@ -4,10 +4,11 @@ import {buildUsageViewModel, formatRelativeTime, getDotColor, PANEL_LABEL_MODES}
 
 const NOW = new Date('2026-02-09T10:00:00Z').getTime();
 
-function makeWindow(label, pct, resetsInText, dotColor) {
+function makeWindow(label, pct, resetsInText, dotColor, fillPct = pct) {
     return {
         label,
         remainingPct: pct,
+        fillPct,
         remainingText: `${pct}% left`,
         resetsInText,
         dotColor,
@@ -68,14 +69,14 @@ describe('buildUsageViewModel', () => {
 
         const codex = view.services[0];
         expect(codex.name).toBe('Codex');
-        expect(codex.windows[0]).toEqual(makeWindow('Session', 73, 'Resets in 2h 18m', 'green'));
+        expect(codex.windows[0]).toEqual(makeWindow('Session', 73, 'Resets in 2h 18m', 'emerald'));
         expect(codex.windows[1]).toEqual(makeWindow('Weekly', 91, 'Resets in 4d 7h', 'green'));
         expect(codex.warning).toBe('Codex: authentication expired');
 
         const claude = view.services[1];
         expect(claude.name).toBe('Claude');
-        expect(claude.windows[0]).toEqual(makeWindow('Session', 60, 'Resets in 2h 18m', 'yellow'));
-        expect(claude.windows[1]).toEqual(makeWindow('Weekly', 25, 'Resets in 4d 7h', 'red'));
+        expect(claude.windows[0]).toEqual(makeWindow('Session', 60, 'Resets in 2h 18m', 'emerald'));
+        expect(claude.windows[1]).toEqual(makeWindow('Weekly', 25, 'Resets in 4d 7h', 'orange'));
         expect(claude.warning).toBe('');
     });
 
@@ -233,18 +234,28 @@ describe('formatRelativeTime', () => {
 });
 
 describe('getDotColor', () => {
-    test('green for >= 70', () => {
-        expect(getDotColor(70)).toBe('green');
+    test('green for >= 80', () => {
+        expect(getDotColor(80)).toBe('green');
         expect(getDotColor(100)).toBe('green');
     });
 
-    test('yellow for 30-69', () => {
-        expect(getDotColor(30)).toBe('yellow');
-        expect(getDotColor(69)).toBe('yellow');
+    test('emerald for 50-79', () => {
+        expect(getDotColor(50)).toBe('emerald');
+        expect(getDotColor(79)).toBe('emerald');
     });
 
-    test('red for < 30', () => {
-        expect(getDotColor(29)).toBe('red');
+    test('yellow for 30-49', () => {
+        expect(getDotColor(30)).toBe('yellow');
+        expect(getDotColor(49)).toBe('yellow');
+    });
+
+    test('orange for 15-29', () => {
+        expect(getDotColor(15)).toBe('orange');
+        expect(getDotColor(29)).toBe('orange');
+    });
+
+    test('red for < 15', () => {
+        expect(getDotColor(14)).toBe('red');
         expect(getDotColor(0)).toBe('red');
     });
 

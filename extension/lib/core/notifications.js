@@ -97,3 +97,7 @@ var createThresholdNotifier = function(options = {}) {
         evaluate,
     };
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {createThresholdNotifier};
+}

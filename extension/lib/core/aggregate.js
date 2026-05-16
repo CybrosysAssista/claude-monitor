@@ -46,3 +46,7 @@ var computeSummary = function(providerStates) {
         lastUpdatedAtIso: latestTimestamp,
     };
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {computeSummary};
+}
