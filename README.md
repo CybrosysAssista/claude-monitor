@@ -36,20 +36,21 @@
 
 4. The menu bar entry appears immediately. Click it to see session and weekly breakdowns.
 
-**Credentials:** On first launch, macOS will show a security prompt:
+**Credentials:** On first launch, macOS will show keychain security prompts — one for each provider you have installed:
 
 > *"Claude Monitor wants to access 'Claude Code-credentials' in your keychain."*
+> *"Claude Monitor wants to access 'Codex Auth' in your keychain."*
 
-Enter your **Mac login password** and click **Always Allow** — this lets the app read your Claude Code session from the system keychain without prompting again.
+Enter your **Mac login password** and click **Always Allow** for each — this grants permanent read access so the prompts never appear again.
 
-If the keychain item isn't found (e.g. on older Claude Code installs), the app falls back to reading directly from the credential files:
+If a keychain item isn't found (e.g. CLI not installed or older version), the app falls back to reading directly from the credential files:
 
-| Provider | File |
-|----------|------|
-| Claude | `~/.claude/.credentials.json` |
-| Codex | `~/.codex/auth.json` |
+| Provider | Keychain service | File fallback |
+|----------|-----------------|---------------|
+| Claude | `"Claude Code-credentials"` | `~/.claude/.credentials.json` |
+| Codex | `"Codex Auth"` | `~/.codex/auth.json` |
 
-If a file is missing, that provider shows **→ Install CLI** in the menu with a link to the install page.
+If neither keychain nor file is found for a provider, that provider shows **→ Install CLI** in the menu.
 
 ![Claude Monitor menu bar](assets/preview.png)
 
@@ -161,7 +162,7 @@ Sources/ClaudeMonitor/
   NotificationManager.swift    — fires UNUserNotification below 20% threshold
   Providers/
     ClaudeProvider.swift       — keychain read → file fallback → OAuth refresh → usage fetch
-    CodexProvider.swift        — file read → OAuth refresh → usage fetch
+    CodexProvider.swift        — keychain read → file fallback → OAuth refresh → usage fetch
     Keychain.swift             — SecItemCopyMatching wrapper (triggers macOS auth dialog)
     Credentials.swift          — reads ~/.claude/.credentials.json, ~/.codex/auth.json
     HTTPClient.swift           — URLSession async wrappers
@@ -176,9 +177,13 @@ Sources/ClaudeMonitor/
 ```
 
 **Credential resolution order (macOS):**
-1. macOS Keychain — `service: "Claude Code-credentials"` (set by Claude Code CLI)
-2. File fallback — `~/.claude/.credentials.json`
-3. If neither found → shows **→ Install CLI** link
+
+| Provider | Keychain service | File fallback |
+|----------|-----------------|---------------|
+| Claude | `"Claude Code-credentials"` | `~/.claude/.credentials.json` |
+| Codex | `"Codex Auth"` | `~/.codex/auth.json` |
+
+Each provider tries keychain first, falls back to file, shows **→ Install CLI** link if neither is found.
 
 ### GNOME extension
 
