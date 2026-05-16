@@ -29,13 +29,13 @@ describe('buildUsageViewModel', () => {
 
             for (const w of svc.windows) {
                 expect(w.remainingPct).toBe(0);
-                expect(w.remainingText).toBe('-- left');
+                expect(w.remainingText).toBe('-- used');
                 expect(w.resetsInText).toBe('--');
                 expect(w.dotColor).toBe('red');
             }
         }
 
-        expect(view.version).toBe('Claude Monitor 1.0.0');
+        expect(view.version).toBe('Claude Monitor 1.1.0');
         expect(view.lastUpdate).toBe('Next update in --');
     });
 
@@ -63,7 +63,7 @@ describe('buildUsageViewModel', () => {
                     },
                 },
             },
-        }, {now: NOW});
+        }, {now: NOW, displayInverted: true});
 
         expect(view.panelLabel).toBe('12%');
 
@@ -128,7 +128,7 @@ describe('buildUsageViewModel', () => {
                     data: {sessionRemainingPct: 73, weeklyRemainingPct: 91},
                 },
             },
-        }, {now: NOW, panelLabelMode: 'claude-session'});
+        }, {now: NOW, panelLabelMode: 'claude-session', displayInverted: true});
         expect(view.panelLabel).toBe('60%');
     });
 
@@ -141,7 +141,7 @@ describe('buildUsageViewModel', () => {
                     data: {sessionRemainingPct: 60, weeklyRemainingPct: 25},
                 },
             },
-        }, {now: NOW, panelLabelMode: 'claude-weekly'});
+        }, {now: NOW, panelLabelMode: 'claude-weekly', displayInverted: true});
         expect(view.panelLabel).toBe('25%');
     });
 
@@ -154,7 +154,7 @@ describe('buildUsageViewModel', () => {
                     data: {sessionRemainingPct: 73, weeklyRemainingPct: 91},
                 },
             },
-        }, {now: NOW, panelLabelMode: 'codex-session'});
+        }, {now: NOW, panelLabelMode: 'codex-session', displayInverted: true});
         expect(view.panelLabel).toBe('73%');
     });
 
@@ -167,7 +167,7 @@ describe('buildUsageViewModel', () => {
                     data: {sessionRemainingPct: 73, weeklyRemainingPct: 91},
                 },
             },
-        }, {now: NOW, panelLabelMode: 'codex-weekly'});
+        }, {now: NOW, panelLabelMode: 'codex-weekly', displayInverted: true});
         expect(view.panelLabel).toBe('91%');
     });
 
@@ -180,7 +180,7 @@ describe('buildUsageViewModel', () => {
                     data: {sessionRemainingPct: 60, weeklyRemainingPct: 25},
                 },
             },
-        }, {now: NOW});
+        }, {now: NOW, displayInverted: true});
         expect(view.panelLabel).toBe('12%');
     });
 
@@ -193,7 +193,7 @@ describe('buildUsageViewModel', () => {
         const view = buildUsageViewModel({
             minRemainingPct: 42,
             providers: {},
-        }, {now: NOW, panelLabelMode: 'unknown-mode'});
+        }, {now: NOW, panelLabelMode: 'unknown-mode', displayInverted: true});
         expect(view.panelLabel).toBe('42%');
     });
 });

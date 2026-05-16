@@ -236,7 +236,7 @@ var buildUsageViewModel = function(summary, deps = {}) {
     const now = deps.now ?? Date.now();
     const version = deps.version ?? VERSION;
     const pollIntervalMs = deps.pollIntervalMs ?? 180_000;
-    const inverted = deps.displayInverted ?? true;
+    const inverted = deps.displayInverted ?? false;
 
     // Accept both old single string and new array; default to 'overall'
     let userModes = deps.panelLabelModes ?? deps.panelLabelMode ?? ['overall'];

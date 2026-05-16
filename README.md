@@ -13,7 +13,7 @@
 
 | Platform | Version | Download |
 |----------|---------|----------|
-| **macOS** (13 Ventura+) | v1.0.0 | [Claude Monitor-Installer.dmg](https://github.com/CybrosysAssista/claude-monitor/releases/download/v1.0.0-macos/Claude.Monitor-Installer.dmg) |
+| **macOS** (13 Ventura+) | v1.0.0 | [Claude.Monitor-Installer.dmg](https://github.com/CybrosysAssista/claude-monitor/releases/download/v1.0.0-macos/Claude.Monitor-Installer.dmg) |
 | **Linux** — GNOME Shell 45–49 | v1.1.0 | [claudemonitor@assista.shell-extension.zip](https://github.com/CybrosysAssista/claude-monitor/releases/download/v1.1.0/claudemonitor%40assista.shell-extension.zip) |
 
 ---
@@ -24,7 +24,7 @@
 
 **Requirements:** macOS 13 (Ventura) or newer.
 
-1. Download **`Claude Monitor-Installer.dmg`** from the table above
+1. Download **`Claude.Monitor-Installer.dmg`** from the table above
 2. Open the `.dmg` — drag **Claude Monitor.app** into `/Applications`
 3. Launch from `/Applications`
 
