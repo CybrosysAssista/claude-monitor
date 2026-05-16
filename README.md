@@ -9,10 +9,6 @@
 
 ---
 
-![Claude Monitor popup](assets/preview.png)
-
----
-
 ## Download
 
 | Platform | Version | Download |
@@ -40,7 +36,13 @@
 
 4. The menu bar entry appears immediately. Click it to see session and weekly breakdowns.
 
-**Credentials:** Reads automatically from the files the CLI tools write — no extra setup needed if you already use Claude Code or Codex CLI:
+**Credentials:** On first launch, macOS will show a security prompt:
+
+> *"Claude Monitor wants to access 'Claude Code-credentials' in your keychain."*
+
+Enter your **Mac login password** and click **Always Allow** — this lets the app read your Claude Code session from the system keychain without prompting again.
+
+If the keychain item isn't found (e.g. on older Claude Code installs), the app falls back to reading directly from the credential files:
 
 | Provider | File |
 |----------|------|
@@ -48,6 +50,8 @@
 | Codex | `~/.codex/auth.json` |
 
 If a file is missing, that provider shows **→ Install CLI** in the menu with a link to the install page.
+
+![Claude Monitor menu bar](assets/preview.png)
 
 ---
 
@@ -78,7 +82,7 @@ bash scripts/dev/install.sh
 bash scripts/dev/enable.sh
 ```
 
-**Credentials:** Same files as macOS — written automatically by the CLI tools:
+**Credentials:** Written automatically by the CLI tools — no extra setup needed:
 
 | Provider | File |
 |----------|------|
@@ -142,7 +146,41 @@ Toggle **Reversed (% left)** to flip between "% used" and "% left".
 
 ---
 
-## Architecture (GNOME extension)
+## Architecture
+
+### macOS app
+
+```
+Sources/ClaudeMonitor/
+  AppDelegate.swift            — app lifecycle, menu bar setup
+  StatusBarController.swift    — NSStatusItem, popup window management
+  main.swift                   — entry point
+  Settings.swift               — UserDefaults: display mode, inverted toggle
+  Backoff.swift                — exponential backoff for network errors
+  Log.swift                    — unified logging
+  NotificationManager.swift    — fires UNUserNotification below 20% threshold
+  Providers/
+    ClaudeProvider.swift       — keychain read → file fallback → OAuth refresh → usage fetch
+    CodexProvider.swift        — file read → OAuth refresh → usage fetch
+    Keychain.swift             — SecItemCopyMatching wrapper (triggers macOS auth dialog)
+    Credentials.swift          — reads ~/.claude/.credentials.json, ~/.codex/auth.json
+    HTTPClient.swift           — URLSession async wrappers
+    Models.swift               — ProviderResult, UsageSnapshot types
+    Normalize.swift            — extracts remaining % from API response shapes
+  UI/
+    ProviderRowView.swift       — per-provider row (label + percentage + reset timer)
+    SectionHeaderView.swift    — section separators
+    LabelRenderer.swift        — formats menu bar label string
+    Formatting.swift           — date/time helpers
+    Colors.swift               — 5-level color thresholds
+```
+
+**Credential resolution order (macOS):**
+1. macOS Keychain — `service: "Claude Code-credentials"` (set by Claude Code CLI)
+2. File fallback — `~/.claude/.credentials.json`
+3. If neither found → shows **→ Install CLI** link
+
+### GNOME extension
 
 ```
 extension.js                 — GNOME lifecycle, GObject UI, wires DI
