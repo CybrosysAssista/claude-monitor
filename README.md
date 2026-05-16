@@ -13,13 +13,22 @@
 
 ---
 
+## Download
+
+| Platform | Version | Download |
+|----------|---------|----------|
+| **macOS** (13 Ventura+) | v1.0.0 | [Claude Monitor-Installer.dmg](https://github.com/CybrosysAssista/claude-monitor/releases/download/v1.0.0-macos/Claude.Monitor-Installer.dmg) |
+| **Linux** — GNOME Shell 45–49 | v1.1.0 | [claudemonitor@assista.shell-extension.zip](https://github.com/CybrosysAssista/claude-monitor/releases/download/v1.1.0/claudemonitor%40assista.shell-extension.zip) |
+
+---
+
 ## Install
 
 ### macOS
 
 **Requirements:** macOS 13 (Ventura) or newer.
 
-1. Download **`Claude.Monitor.dmg`** from [Releases](https://github.com/CybrosysAssista/claude-monitor/releases/latest)
+1. Download **`Claude Monitor-Installer.dmg`** from the table above
 2. Open the `.dmg` — drag **Claude Monitor.app** into `/Applications`
 3. Launch from `/Applications`
 
@@ -49,7 +58,7 @@ If a file is missing, that provider shows **→ Install CLI** in the menu with a
 **From GitHub Releases:**
 
 ```bash
-# Download claudemonitor@assista.shell-extension.zip from Releases, then:
+# Download claudemonitor@assista.shell-extension.zip from the table above, then:
 gnome-extensions install --force claudemonitor@assista.shell-extension.zip
 
 # Restart GNOME Shell:
